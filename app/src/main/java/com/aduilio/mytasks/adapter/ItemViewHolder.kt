@@ -8,6 +8,5 @@ class ItemViewHolder(private val binding: ListItemBinding) : RecyclerView.ViewHo
 
     fun setData(task: Task) {
         binding.tvTitle.text = task.title
-        binding.tvDate.text = task.date
     }
 }
