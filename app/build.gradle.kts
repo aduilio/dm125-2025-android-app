@@ -29,11 +29,11 @@ android {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
+    kotlin {
+        jvmToolchain(11)
+    }
     buildFeatures {
         viewBinding = true
-    }
-    kotlinOptions {
-        jvmTarget = "11"
     }
 }
 
@@ -47,4 +47,5 @@ dependencies {
     implementation(libs.converter.gson)
     implementation(libs.logging.interceptor)
     implementation(libs.lifecycle.viewmodel.ktx)
+    implementation(libs.swipe.refresh.layout)
 }

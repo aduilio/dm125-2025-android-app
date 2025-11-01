@@ -2,11 +2,17 @@ package com.aduilio.mytasks.activity
 
 import android.content.Intent
 import android.os.Bundle
+import android.view.View
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
+import androidx.recyclerview.widget.ItemTouchHelper
+import com.aduilio.mytasks.R
 import com.aduilio.mytasks.adapter.ListAdapter
+import com.aduilio.mytasks.adapter.TouchCallback
 import com.aduilio.mytasks.databinding.ActivityMainBinding
+import com.aduilio.mytasks.listener.SwipeListener
 import com.aduilio.mytasks.service.TaskService
 
 class MainActivity : AppCompatActivity() {
@@ -33,17 +39,49 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun initComponents() {
-        adapter = ListAdapter()
+        binding.tvMessage.visibility = View.INVISIBLE
+
+        adapter = ListAdapter(this, binding.tvMessage)
         binding.rvMain.adapter = adapter
 
         binding.fabNew.setOnClickListener {
             startActivity(Intent(this, FormActivity::class.java))
         }
+
+        ItemTouchHelper(TouchCallback(object : SwipeListener {
+            override fun onSwipe(position: Int) {
+                adapter.getItem(position).id?.let {
+                    taskService.delete(it).observe(this@MainActivity) { response ->
+                        if (response.error) {
+                            adapter.notifyItemChanged(position)
+                        } else {
+                            adapter.removeItem(position)
+                        }
+                    }
+                }
+            }
+        })).attachToRecyclerView(binding.rvMain)
+
+        binding.srlMain.setOnRefreshListener {
+            getTasks()
+        }
     }
 
     private fun getTasks() {
         taskService.list().observe(this) { response ->
-            adapter.setData(response)
+            binding.srlMain.isRefreshing = false
+
+            if (response.error) {
+                binding.tvMessage.visibility = View.VISIBLE
+                binding.tvMessage.text = ContextCompat.getString(this, R.string.server_error)
+            } else {
+                response.value?.let {
+                    adapter.setData(it)
+                } ?: run {
+                    binding.tvMessage.visibility = View.VISIBLE
+                    binding.tvMessage.text = ContextCompat.getString(this, R.string.empty_list)
+                }
+            }
         }
     }
 }
