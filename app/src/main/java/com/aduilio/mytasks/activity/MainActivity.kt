@@ -14,14 +14,17 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.ItemTouchHelper
 import com.aduilio.mytasks.R
 import com.aduilio.mytasks.adapter.ListAdapter
 import com.aduilio.mytasks.adapter.TouchCallback
 import com.aduilio.mytasks.databinding.ActivityMainBinding
+import com.aduilio.mytasks.entity.Task
 import com.aduilio.mytasks.listener.ClickListener
 import com.aduilio.mytasks.listener.SwipeListener
 import com.aduilio.mytasks.service.TaskService
+import androidx.core.content.edit
 
 class MainActivity : AppCompatActivity() {
 
@@ -40,6 +43,18 @@ class MainActivity : AppCompatActivity() {
         initComponents()
 
         askNotificationPermission()
+
+        val preferences = PreferenceManager.getDefaultSharedPreferences(this)
+        if (preferences.getBoolean("first_run", true)) {
+            AlertDialog.Builder(this)
+                    .setMessage("Aqui vc vai criar suas tarefas.")
+                    .setNeutralButton(android.R.string.ok, null)
+                    .create()
+                    .show()
+
+            preferences.edit { putBoolean("first_run", false) }
+        }
+
     }
 
     override fun onResume() {
@@ -60,13 +75,18 @@ class MainActivity : AppCompatActivity() {
         }
 
         return super.onOptionsItemSelected(item)
-
     }
 
     private fun initComponents() {
         binding.tvMessage.visibility = View.INVISIBLE
 
         adapter = ListAdapter(this, binding.tvMessage, object : ClickListener {
+            override fun onClick(task: Task) {
+                val intent = Intent(this@MainActivity, FormActivity::class.java)
+                intent.putExtra("task", task)
+                startActivity(intent)
+            }
+
             override fun onComplete(id: Long) {
                 taskService.complete(id).observe(this@MainActivity) { response ->
                     if (!response.error) {

@@ -1,11 +1,16 @@
 package com.aduilio.mytasks.service
 
+import com.aduilio.mytasks.adapter.LocalDateAdapter
+import com.aduilio.mytasks.adapter.LocalTimeAdapter
 import com.aduilio.mytasks.repository.TaskRepository
+import com.google.gson.GsonBuilder
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Converter
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import java.time.LocalDate
+import java.time.LocalTime
 
 class RetrofitService() {
 
@@ -37,6 +42,11 @@ class RetrofitService() {
     }
 
     private fun createConverter(): Converter.Factory {
-        return GsonConverterFactory.create()
+        val gson = GsonBuilder()
+                .registerTypeAdapter(LocalDate::class.java, LocalDateAdapter())
+                .registerTypeAdapter(LocalTime::class.java, LocalTimeAdapter())
+                .create()
+
+        return GsonConverterFactory.create(gson)
     }
 }
