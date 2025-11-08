@@ -27,6 +27,10 @@ import com.aduilio.mytasks.listener.SwipeListener
 import com.aduilio.mytasks.service.TaskService
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class MainActivity : AppCompatActivity() {
 
@@ -56,7 +60,6 @@ class MainActivity : AppCompatActivity() {
 
             preferences.edit { putBoolean("first_run", false) }
         }
-
     }
 
     override fun onResume() {
@@ -102,6 +105,15 @@ class MainActivity : AppCompatActivity() {
 
         binding.fabNew.setOnClickListener {
             startActivity(Intent(this, FormActivity::class.java))
+
+            //Test Main Thread - IO Thread
+//            CoroutineScope(Dispatchers.IO).launch {
+//                Thread.sleep(10000)
+//
+//                withContext(Dispatchers.Main) {
+//                    supportActionBar?.title = "Teste"
+//                }
+//            }
         }
 
         ItemTouchHelper(TouchCallback(object : SwipeListener {
