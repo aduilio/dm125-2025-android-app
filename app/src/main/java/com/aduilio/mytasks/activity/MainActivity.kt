@@ -14,6 +14,7 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import androidx.core.content.edit
 import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.ItemTouchHelper
 import com.aduilio.mytasks.R
@@ -24,7 +25,8 @@ import com.aduilio.mytasks.entity.Task
 import com.aduilio.mytasks.listener.ClickListener
 import com.aduilio.mytasks.listener.SwipeListener
 import com.aduilio.mytasks.service.TaskService
-import androidx.core.content.edit
+import com.google.firebase.Firebase
+import com.google.firebase.auth.auth
 
 class MainActivity : AppCompatActivity() {
 
@@ -70,8 +72,9 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        if (item.itemId == R.id.preferences) {
-            startActivity(Intent(this, PreferenceActivity::class.java))
+        when (item.itemId) {
+            R.id.preferences -> startActivity(Intent(this, PreferenceActivity::class.java))
+            R.id.logout -> logout()
         }
 
         return super.onOptionsItemSelected(item)
@@ -136,6 +139,15 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         }
+    }
+
+    private fun logout() {
+        Firebase.auth.signOut()
+
+        val intent = Intent(this, LoginActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        }
+        startActivity(intent)
     }
 
     private fun askNotificationPermission() {
